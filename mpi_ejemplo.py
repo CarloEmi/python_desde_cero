@@ -15,3 +15,5 @@ elif rank == 1:
     # El proceso con rank 1 recibe el mensaje
     data = comm.recv(source=0, tag=11)
     print(f"Proceso 1 recibió: {data}")
+else:
+    print(f"Proceso {rank} no tiene nada que hacer")

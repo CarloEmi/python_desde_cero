@@ -6,10 +6,10 @@
 ### UNaM - FCEQyN
 
 ## Descripción del Programa
-Este programa permite gestionar la asistencia de estudiantes de una materia utilizando un CRUD (Crear, Leer, Actualizar, Eliminar) conectado a Firebase como base de datos. El sistema incluye funcionalidades de autenticación mediante DNI y contraseña, lo que asegura que solo usuarios autorizados puedan realizar modificaciones.
+Este programa permite gestionar la asistencia de estudiantes de una materia utilizando un CRUD (Crear, Leer, Actualizar, Eliminar) conectado a Firebase como base de datos. El sistema incluye funcionalidades de autenticación mediante DNI y contraseña, lo que asegura que solo usuarios autorizados puedan realizar modificaciones. A su vez permite un CRUD de usuarios administradores.
 
 El sistema permite:
-1. Registrar estudiantes.
+1. Registrar estudiantes y administradores
 2. Registrar asistencias o inasistencias con una fecha específica (dentro del último mes).
 3. Visualizar el historial de asistencias e inasistencias por estudiante.
 4. Modificar registros erróneos en el historial.

@@ -2,13 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from firebase_admin import credentials, firestore, initialize_app
 from datetime import datetime, timedelta
 import re
-
-# Probar conexión
+'''
 try:
     db.collection('test').add({'message': 'Conexión exitosa'})
     print("Conectado exitosamente a Firebase")
 except Exception as e:
     print("Error conectando a Firebase:", e)
+'''
+# Probar conexión
 
 # Inicializar la app de Flask
 app = Flask(__name__)

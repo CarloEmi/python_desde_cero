@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # Creamos un executor para manejar 2 hebras simultáneas
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Ejecutar la función en paralelo con diferentes tiempos de espera
-        resultados = [executor.submit(trabajo_pesado, segundos) for segundos in [5, 3, 1]]
+        resultados = [executor.submit(trabajo_pesado, segundos) for segundos in [7, 3, 1]]
         # Imprimir resultados una vez que estén completos
         for resultado in concurrent.futures.as_completed(resultados):
             print(resultado.result())

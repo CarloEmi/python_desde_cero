@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Asistencia</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Centrar el contenedor en la pantalla */
+        .historial-container {
+            max-width: 600px;  /* Limitar el ancho a un valor de 600px */
+            margin: 100px auto;  /* Centrar el contenedor en la página */
+            padding: 30px;
+            border: 1px solid #ddd;  /* Agregar un borde alrededor */
+            border-radius: 8px;  /* Bordes redondeados */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+        }
+
+        body {
+            background-color: #f8f9fa; /* Fondo claro para la página */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="historial-container">
+            <h2 class="text-center">Historial de Asistencia</h2>
+            <h4 class="text-center">{{ estudiante.nombre }}</h4>
+            <ul class="list-group mt-4">
+                <li class="list-group-item">Asistencias Totales: <strong>{{ estudiante.asistencias }}</strong></li>
+                <li class="list-group-item">Ausencias Totales: <strong>{{ estudiante.ausencias }}</strong></li>
+            </ul>
+            <h5 class="mt-4">Registros Detallados:</h5>
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in estudiante.historial %}
+                    <tr>
+                        <td>{{ registro.fecha }}</td>
+                        <td>{{ registro.estado }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="/" class="btn btn-secondary mt-4">Regresar</a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Agrega Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
+
+</body>
+</html>

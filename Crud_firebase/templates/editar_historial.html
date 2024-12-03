@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Historial</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Editar Registro de Historial</h2>
+        <h4 class="text-center">{{ estudiante.nombre }} - {{ registro.fecha }}</h4>
+        <form method="post">
+            <div class="form-group">
+                <label>Estado</label><br>
+                <input type="radio" name="estado" value="Presente" id="presente" {% if registro.estado == 'Presente' %}checked{% endif %} required>
+                <label for="presente">Presente</label><br>
+                <input type="radio" name="estado" value="Ausente" id="ausente" {% if registro.estado == 'Ausente' %}checked{% endif %}>
+                <label for="ausente">Ausente</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="/historial/{{ estudiante.id }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Usuario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Centrar el contenedor en la pantalla */
+        .login-container {
+            max-width: 400px;  /* Limitar el ancho a un valor de 400px */
+            margin: 100px auto;  /* Centrar el contenedor en la página */
+            padding: 30px;
+            border: 1px solid #ddd;  /* Agregar un borde alrededor */
+            border-radius: 8px;  /* Bordes redondeados */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+        }
+
+        body {
+            background-color: #f8f9fa; /* Fondo claro para la página */
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2 class="text-center">Editar Usuario</h2>
+        
+        <form method="post">
+            <div class="form-group">
+                <label for="password">Nueva Contraseña:</label>
+                <input type="password" name="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Actualizar</button>
+            <a href="/index_admin" class="btn btn-secondary btn-block">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>

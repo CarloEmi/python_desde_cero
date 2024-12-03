@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcar Asistencia</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Marcar Asistencia para {{ estudiante.nombre }}</h2>
+        <form action="/marcar_asistencia/{{ estudiante.id }}" method="POST">
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" required>
+            </div>
+            <div class="form-group">
+                <label for="accion">Acción:</label>
+                <select class="form-control" name="accion" required>
+                    <option value="asistencia">Marcar Asistencia</option>
+                    <option value="ausencia">Registrar Ausencia</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar</button>
+        </form>
+        
+        
+    </div>
+</body>
+</html>

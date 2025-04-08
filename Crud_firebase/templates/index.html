@@ -4,41 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Estudiantes</title>
+
+    <!-- Bootstrap 4 -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS para Bootstrap 4 -->
+    <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container mt-5">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="nav-item nav-link disabled" href="#">Menú</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
+        <!-- Barra de navegación -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <a class="navbar-brand" href="#">Menú</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
+                <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-              <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" href="/index_admin">Panel de administrador</a>
-                <a class="nav-item nav-link" href="/logout">Cerrar sesión</a>
-                
-              </div>
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="/">Inicio</a>
+                    <a class="nav-item nav-link" href="/index_admin">Panel de administrador</a>
+                    <a class="nav-item nav-link" href="/logout">Cerrar sesión</a>
+                </div>
             </div>
-          </nav>
-        <h3 class="text-left">Bienvenido, {{ session['user'] }} </h3>
-          
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="{{ url_for('crear_usuario') }}">Crear nuevo usuario</a>
-            <a class="dropdown-item" href="{{ url_for('logout') }}">Cerrar sesión</a>
-        </div>
-                
+        </nav>
+
+        <h3 class="mb-3">Bienvenido, {{ session['user'] }}</h3>
         <h2 class="text-center">Listado de Estudiantes</h2>
+
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div class="alert alert-warning">
+            <div class="alert alert-warning mt-3">
                 {{ messages[0] }}
             </div>
         {% endif %}
         {% endwith %}
+
         <a href="/crear" class="btn btn-success mb-3">Añadir Estudiante</a>
-        <table class="table table-bordered">
+
+        <table id="tabla-estudiantes" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%;">
             <thead class="thead-dark">
                 <tr>
                     <th>Nombre</th>
@@ -56,15 +60,16 @@
                     <td>
                         <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
                             <input type="hidden" name="accion" value="asistencia">
-                            <button type="submit" class="btn btn-primary btn-sm">Marcar Asistencia</button>
+                            <button type="submit" class="btn btn-primary btn-sm mb-1">Marcar Asistencia</button>
                         </form>
                         <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
                             <input type="hidden" name="accion" value="ausencia">
-                            <button type="submit" class="btn btn-warning btn-sm">Registrar Ausencia</button>
+                            <button type="submit" class="btn btn-warning btn-sm mb-1">Registrar Ausencia</button>
                         </form>
-                        <a href="/historial/{{ estudiante.id }}" class="btn btn-info btn-sm">Ver Historial</a>
+                        <a href="/agregar_asistencia/{{ estudiante.id }}" class="btn btn-secondary btn-sm mb-1">Agregar Manual</a>
+                        <a href="/historial/{{ estudiante.id }}" class="btn btn-info btn-sm mb-1">Ver Historial</a>
                         <form action="/borrar/{{ estudiante.id }}" method="post" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Borrar</button>
+                            <button type="submit" class="btn btn-danger btn-sm mb-1">Borrar</button>
                         </form>
                     </td>
                 </tr>
@@ -72,13 +77,45 @@
             </tbody>
         </table>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Agrega Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
 
+    <!-- jQuery y Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+
+    <!-- Activar DataTable -->
+    <script>
+        $(document).ready(function() {
+            $('#tabla-estudiantes').DataTable({
+                responsive: true,
+                columnDefs: [
+                    { responsivePriority: 1, targets: 0 }, // Nombre
+                    { responsivePriority: 2, targets: -1 } // Acciones
+                ],
+                language: {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sSearch": "Buscar:",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

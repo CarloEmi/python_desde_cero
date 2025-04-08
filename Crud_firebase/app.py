@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 # Configurar Firebase
-cred = credentials.Certificate("config/seapostoles-firebase-adminsdk-tve75-5335e1f419.json")
+cred = credentials.Certificate("config/seapostoles-firebase-adminsdk-tve75-a8232e6679.json")
 initialize_app(cred)
 db = firestore.client()
 collection_name = 'asistencia'
@@ -191,6 +191,52 @@ def borrar(id):
         return redirect(url_for('login'))
     db.collection(collection_name).document(id).delete()
     return redirect(url_for('index'))
+@app.route('/agregar_asistencia/<id>', methods=['GET', 'POST'])
+def agregar_asistencia(id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    estudiante_ref = db.collection(collection_name).document(id)
+    estudiante = estudiante_ref.get().to_dict()
+
+    if request.method == 'POST':
+        fecha = request.form['fecha']
+        estado = request.form['estado']
+        nuevo_registro = {'fecha': fecha, 'estado': estado}
+
+        # Agrega el historial si no existe
+        if 'historial' not in estudiante:
+            estudiante['historial'] = []
+
+        estudiante['historial'].append(nuevo_registro)
+        estudiante_ref.update({'historial': estudiante['historial']})
+
+        flash("Asistencia agregada exitosamente.")
+        return redirect(url_for('historial', id=id))
+
+    return render_template('agregar_asistencia.html', estudiante=estudiante)
+
+@app.route('/eliminar_registro/<id>/<fecha>', methods=['POST'])
+def eliminar_registro(id, fecha):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    estudiante_ref = db.collection(collection_name).document(id)
+    estudiante = estudiante_ref.get().to_dict()
+
+    if not estudiante or 'historial' not in estudiante:
+        flash("Estudiante o historial no encontrado.")
+        return redirect(url_for('index_admin'))
+
+    # Eliminar el registro con esa fecha
+    nuevo_historial = [r for r in estudiante['historial'] if r['fecha'] != fecha]
+
+    estudiante_ref.update({'historial': nuevo_historial})
+
+    flash("Registro eliminado correctamente.")
+    return redirect(url_for('historial', id=id))
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

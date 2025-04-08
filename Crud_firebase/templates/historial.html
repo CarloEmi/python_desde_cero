@@ -31,11 +31,13 @@
                 <li class="list-group-item">Ausencias Totales: <strong>{{ estudiante.ausencias }}</strong></li>
             </ul>
             <h5 class="mt-4">Registros Detallados:</h5>
+            {% if estudiante.historial %}
             <table class="table table-bordered">
                 <thead class="thead-dark">
                     <tr>
                         <th>Fecha</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,10 +45,20 @@
                     <tr>
                         <td>{{ registro.fecha }}</td>
                         <td>{{ registro.estado }}</td>
+                        <td>
+                            <a href="{{ url_for('editar_historial', id=request.view_args.id, fecha=registro.fecha) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ url_for('eliminar_registro', id=estudiante.id, fecha=registro.fecha) }}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que querés eliminar este registro?')">Eliminar</button>
+                            </form>
+                            
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p>No hay registros de asistencia aún.</p>
+            {% endif %}
             <a href="/" class="btn btn-secondary mt-4">Regresar</a>
         </div>
     </div>

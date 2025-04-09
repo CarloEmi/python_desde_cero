@@ -198,25 +198,52 @@ def agregar_asistencia(id):
     if 'user' not in session:
         return redirect(url_for('login'))
 
+    fecha_hoy = datetime.now().strftime('%Y-%m-%d')
+
     estudiante_ref = db.collection(collection_name).document(id)
     estudiante = estudiante_ref.get().to_dict()
 
+    if not estudiante:
+        flash("Estudiante no encontrado.")
+        return redirect(url_for('index_admin'))
+
     if request.method == 'POST':
         fecha = request.form['fecha']
-        estado = request.form['estado']
-        nuevo_registro = {'fecha': fecha, 'estado': estado}
+        estado = request.form['estado']  # Puede ser 'Presente' o 'Ausente'
 
-        # Agrega el historial si no existe
+        # Inicializar historial si no existe
         if 'historial' not in estudiante:
             estudiante['historial'] = []
 
+        # Verificar si ya existe un registro en esa fecha
+        existe_registro = any(r['fecha'] == fecha for r in estudiante['historial'])
+
+        if existe_registro:
+            flash("Ya existe un registro de asistencia o inasistencia para esa fecha.")
+            return redirect(url_for('historial', id=id))
+
+        # Agregar registro al historial
+        nuevo_registro = {'fecha': fecha, 'estado': estado}
         estudiante['historial'].append(nuevo_registro)
-        estudiante_ref.update({'historial': estudiante['historial']})
+
+        # Actualizar contadores
+        if estado == 'Presente':
+            estudiante['asistencias'] = estudiante.get('asistencias', 0) + 1
+        elif estado == 'Ausente':
+            estudiante['ausencias'] = estudiante.get('ausencias', 0) + 1
+
+        # Guardar cambios en Firebase
+        estudiante_ref.update({
+            'historial': estudiante['historial'],
+            'asistencias': estudiante['asistencias'],
+            'ausencias': estudiante['ausencias']
+        })
 
         flash("Asistencia agregada exitosamente.")
         return redirect(url_for('historial', id=id))
 
     return render_template('agregar_asistencia.html', estudiante=estudiante)
+
 
 @app.route('/eliminar_registro/<id>/<fecha>', methods=['POST'])
 def eliminar_registro(id, fecha):
@@ -241,4 +268,4 @@ def eliminar_registro(id, fecha):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True) #para FLASK
+    app.run(host='0.0.0.0', port=5050, debug=True) #para FLASK

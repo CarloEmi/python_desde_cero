@@ -1,26 +1,28 @@
+import firebase_admin
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from firebase_admin import credentials, firestore, initialize_app
 from datetime import datetime, timedelta
 import re
-'''
-try:
-    db.collection('test').add({'message': 'Conexión exitosa'})
-    print("Conectado exitosamente a Firebase")
-except Exception as e:
-    print("Error conectando a Firebase:", e)
-'''
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 # Probar conexión
 
 # Inicializar la app de Flask
 app = Flask(__name__)
-app.secret_key = 'secret_key'
+#app.secret_key = 'secret_key'
 
 # Configurar Firebase
-cred = credentials.Certificate("config/seapostoles-firebase-adminsdk-tve75-a8232e6679.json")
-initialize_app(cred)
+app.secret_key = os.getenv('SECRET_KEY')
+cred = credentials.Certificate(os.getenv('FIREBASE_KEY'))
+firebase_admin.initialize_app(cred)
+#cred = credentials.Certificate("config/seapostoles-firebase-adminsdk-tve75-a8232e6679.json")
+#initialize_app(cred)
 db = firestore.client()
 collection_name = 'asistencia'
 usuarios_collection = 'usuarios'
+
 
 # Crear usuario de prueba
 prueba_ref = db.collection(usuarios_collection).document("123456789")
@@ -239,4 +241,4 @@ def eliminar_registro(id, fecha):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True) #para FLASK

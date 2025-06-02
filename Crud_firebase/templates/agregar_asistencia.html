@@ -25,7 +25,8 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-success">Guardar</button>
-            <a href="{{ url_for('historial', id=estudiante.id) }}" class="btn btn-secondary">Cancelar</a>
+            <a href="{{ url_for('index', id=request.view_args.id) }}" class="btn btn-secondary">Cancelar</a>
+
         </form>
     </div>
 </body>

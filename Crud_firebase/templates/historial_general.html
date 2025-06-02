@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial General</title>
+
+    <!-- Bootstrap 4 -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <a class="navbar-brand" href="#">Menú</a>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" href="/">Inicio</a>
+                    <a class="nav-item nav-link" href="/index_admin">Panel de administrador</a>
+                    <a class="nav-item nav-link" href="/logout">Cerrar sesión</a>
+                </div>
+            </div>
+        </nav>
+
+        <h2 class="text-center">Historial General de Asistencias</h2>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-info mt-3">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Filtro de fechas -->
+        <form method="get" class="form-inline mb-3 justify-content-center">
+            <label class="mr-2">Desde:</label>
+            <input type="date" name="desde" class="form-control mr-3" value="{{ request.args.get('desde', '') }}">
+            <label class="mr-2">Hasta:</label>
+            <input type="date" name="hasta" class="form-control mr-3" value="{{ request.args.get('hasta', '') }}">
+            <button type="submit" class="btn btn-primary mr-2">Filtrar</button>
+            <a href="{{ url_for('historial_general') }}" class="btn btn-secondary">Limpiar</a>
+        </form>
+
+        <table id="tabla-historial" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%;">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Nombre completo</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrada in historial %}
+                <tr>
+                    <td>{{ entrada.fecha | latam_fecha }}</td>
+                    <td>{{ entrada.nombre }}</td>
+                    <td>
+                        {% if entrada.estado == 'Presente' %}
+                            <span class="badge badge-success">{{ entrada.estado }}</span>
+                        {% else %}
+                            <span class="badge badge-danger">{{ entrada.estado }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="/eliminar_registro/{{ entrada.id }}/{{ entrada.fecha }}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar este registro?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tabla-historial').DataTable({
+                responsive: true,
+                order: [[0, 'desc']], // orden por fecha descendente
+                language: {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando 0 a 0 de 0 registros",
+                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                    "sSearch": "Buscar:",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

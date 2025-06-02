@@ -125,6 +125,30 @@ def crear():
         return redirect(url_for('index'))
     return render_template('crear.html')
 
+@app.route('/editar_nombre/<id>', methods=['GET', 'POST'])
+def editar_nombre(id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    estudiante_ref = db.collection(collection_name).document(id)
+    estudiante = estudiante_ref.get().to_dict()
+
+    if not estudiante:
+        flash("Estudiante no encontrado.")
+        return redirect(url_for('index_admin'))
+
+    if request.method == 'POST':
+        nuevo_nombre = request.form.get('nombre')
+        if nuevo_nombre:
+            estudiante_ref.update({'nombre': nuevo_nombre})
+            flash("Nombre actualizado correctamente.")
+            return redirect(url_for('index'))
+        else:
+            flash("El nombre no puede estar vacío.")
+
+    return render_template('editar_nombre.html', estudiante=estudiante)
+
+
 @app.route('/marcar_asistencia/<id>', methods=['GET', 'POST'])
 def marcar_asistencia(id):
     if 'user' not in session:
@@ -165,9 +189,46 @@ def marcar_asistencia(id):
 def historial(id):
     if 'user' not in session:
         return redirect(url_for('login'))
+
+    desde = request.args.get('desde')
+    hasta = request.args.get('hasta')
+
     estudiante_ref = db.collection(collection_name).document(id)
     estudiante = estudiante_ref.get().to_dict()
+
+    if not estudiante:
+        flash("Estudiante no encontrado.")
+        return redirect(url_for('index_admin'))
+
+    historial_completo = estudiante.get("historial", [])
+    historial_filtrado = []
+    asistencias_filtradas = 0
+    ausencias_filtradas = 0
+
+    for registro in historial_completo:
+        fecha = registro['fecha']
+        if (not desde or fecha >= desde) and (not hasta or fecha <= hasta):
+            historial_filtrado.append(registro)
+            if registro['estado'] == 'Presente':
+                asistencias_filtradas += 1
+            else:
+                ausencias_filtradas += 1
+
+    # Ordenar el historial por fecha descendente
+    historial_filtrado.sort(key=lambda r: r["fecha"], reverse=True)
+
+    # Actualizar totales en la base de datos
+    estudiante_ref.update({
+        'asistencias': asistencias_filtradas,
+        'ausencias': ausencias_filtradas
+    })
+
+    estudiante["historial"] = historial_filtrado
+    estudiante["asistencias"] = asistencias_filtradas
+    estudiante["ausencias"] = ausencias_filtradas
+
     return render_template('historial.html', estudiante=estudiante)
+
 
 @app.route('/editar_historial/<id>/<fecha>', methods=['GET', 'POST'])
 def editar_historial(id, fecha):
@@ -175,17 +236,32 @@ def editar_historial(id, fecha):
         return redirect(url_for('login'))
     estudiante_ref = db.collection(collection_name).document(id)
     estudiante = estudiante_ref.get().to_dict()
-    registro = next((r for r in estudiante['historial'] if r['fecha'] == fecha), None)
+    historial = estudiante.get('historial', [])
+    registro = next((r for r in historial if r['fecha'] == fecha), None)
+
     if not registro:
         flash("Registro no encontrado.")
         return redirect(url_for('historial', id=id))
+
     if request.method == 'POST':
-        estado = request.form['estado']
-        registro['estado'] = estado
-        estudiante_ref.update({'historial': estudiante['historial']})
+        nuevo_estado = request.form['estado']
+        registro['estado'] = nuevo_estado
+
+        # Recalcular asistencias y ausencias
+        asistencias = sum(1 for r in historial if r['estado'] == 'asistencia')
+        ausencias = sum(1 for r in historial if r['estado'] == 'ausencia')
+
+        estudiante_ref.update({
+            'historial': historial,
+            'asistencias': asistencias,
+            'ausencias': ausencias
+        })
+
         flash("Historial actualizado exitosamente.")
         return redirect(url_for('historial', id=id))
+
     return render_template('editar_historial.html', registro=registro, estudiante=estudiante)
+
 
 @app.route('/borrar/<id>', methods=['POST'])
 def borrar(id):
@@ -257,14 +333,61 @@ def eliminar_registro(id, fecha):
         flash("Estudiante o historial no encontrado.")
         return redirect(url_for('index_admin'))
 
-    # Eliminar el registro con esa fecha
-    nuevo_historial = [r for r in estudiante['historial'] if r['fecha'] != fecha]
+    historial = estudiante['historial']
+    
+    for registro in historial:
+        if registro['fecha'] == fecha:
+            if registro['estado'].lower() == 'presente':
+                estudiante['asistencias'] -= 1
+            else:
+                estudiante['ausencias'] -= 1
+            break
 
-    estudiante_ref.update({'historial': nuevo_historial})
+    nuevo_historial = [r for r in historial if r['fecha'] != fecha]
+
+    estudiante_ref.update({
+        'historial': nuevo_historial,
+        'asistencias': estudiante['asistencias'],
+        'ausencias': estudiante['ausencias']
+    })
 
     flash("Registro eliminado correctamente.")
     return redirect(url_for('historial', id=id))
 
+
+@app.route('/historial_general')
+def historial_general():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+
+    desde = request.args.get('desde')
+    hasta = request.args.get('hasta')
+
+    historial_filtrado = []
+    estudiantes_ref = db.collection(collection_name).stream()
+
+    for est in estudiantes_ref:
+        data = est.to_dict()
+        historial = data.get('historial', [])
+        for registro in historial:
+            fecha = registro['fecha']
+            if (not desde or fecha >= desde) and (not hasta or fecha <= hasta):
+                historial_filtrado.append({
+                    'fecha': fecha,
+                    'nombre': data.get('nombre', 'Sin nombre'),
+                    'estado': registro['estado'],
+                    'id': est.id  # Usamos el ID del documento
+                })
+
+    historial_ordenado = sorted(historial_filtrado, key=lambda x: x['fecha'], reverse=True)
+    return render_template('historial_general.html', historial=historial_ordenado)
+
+@app.template_filter('latam_fecha')
+def latam_fecha(value):
+    try:
+        return datetime.strptime(value, '%Y-%m-%d').strftime('%d/%m/%Y')
+    except:
+        return value
 
 
 if __name__ == '__main__':

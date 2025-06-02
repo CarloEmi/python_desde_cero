@@ -11,6 +11,9 @@
     <!-- DataTables CSS para Bootstrap 4 -->
     <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CDN -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="container mt-5">
@@ -24,6 +27,7 @@
                 <div class="navbar-nav">
                     <a class="nav-item nav-link" href="/">Inicio</a>
                     <a class="nav-item nav-link" href="/index_admin">Panel de administrador</a>
+                    <a class="nav-item nav-link" href="/historial_general">Historial general<span class="sr-only">(current)</span></a>
                     <a class="nav-item nav-link" href="/logout">Cerrar sesión</a>
                 </div>
             </div>
@@ -54,7 +58,7 @@
             <tbody>
                 {% for estudiante in estudiantes %}
                 <tr>
-                    <td>{{ estudiante.nombre }}</td>
+                    <td>{{ estudiante.nombre }}<a href="/editar_nombre/{{ estudiante.id }}" class="btn btn-outline-primary btn-sm mb-1"> Editar</a></td>
                     <td>{{ estudiante.asistencias }}</td>
                     <td>{{ estudiante.ausencias }}</td>
                     <td>
@@ -68,7 +72,7 @@
                         </form>
                         <a href="/agregar_asistencia/{{ estudiante.id }}" class="btn btn-secondary btn-sm mb-1">Agregar Manual</a>
                         <a href="/historial/{{ estudiante.id }}" class="btn btn-info btn-sm mb-1">Ver Historial</a>
-                        <form action="/borrar/{{ estudiante.id }}" method="post" style="display:inline;">
+                        <form action="/borrar/{{ estudiante.id }}" method="post" style="display:inline;" action="{{ url_for('borrar', id=estudiante.id) }}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este registro?')">
                             <button type="submit" class="btn btn-danger btn-sm mb-1">Borrar</button>
                         </form>
                     </td>

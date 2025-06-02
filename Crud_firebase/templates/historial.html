@@ -30,9 +30,21 @@
                 <li class="list-group-item">Asistencias Totales: <strong>{{ estudiante.asistencias }}</strong></li>
                 <li class="list-group-item">Ausencias Totales: <strong>{{ estudiante.ausencias }}</strong></li>
             </ul>
+            
+            <form method="get" class="form-inline mb-3">
+                <label for="desde" class="mr-2">Desde:</label>
+                <input type="date" name="desde" id="desde" class="form-control mr-3" value="{{ request.args.desde or '' }}">
+                
+                <label for="hasta" class="mr-2">Hasta:</label>
+                <input type="date" name="hasta" id="hasta" class="form-control mr-3" value="{{ request.args.hasta or '' }}">
+
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
+
+            
             <h5 class="mt-4">Registros Detallados:</h5>
             {% if estudiante.historial %}
-            <table class="table table-bordered">
+            <table id="tabla-estudiantes" class="table table-bordered">
                 <thead class="thead-dark">
                     <tr>
                         <th>Fecha</th>
@@ -43,8 +55,14 @@
                 <tbody>
                     {% for registro in estudiante.historial %}
                     <tr>
-                        <td>{{ registro.fecha }}</td>
-                        <td>{{ registro.estado }}</td>
+                        <td>{{ registro.fecha | latam_fecha}}</td>
+                        <td>
+                            {% if registro.estado == 'Presente' %}
+                                <span class="badge badge-success">{{ registro.estado }}</span>
+                            {% else %}
+                                <span class="badge badge-danger">{{ registro.estado }}</span>
+                            {% endif %}
+                        </td>
                         <td>
                             <a href="{{ url_for('editar_historial', id=request.view_args.id, fecha=registro.fecha) }}" class="btn btn-warning btn-sm">Editar</a>
                             <form action="{{ url_for('eliminar_registro', id=request.view_args.id, fecha=registro.fecha) }}" method="post" style="display:inline;">
@@ -69,6 +87,44 @@
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
-
+    
+    <!-- jQuery y Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+<!-- Activar DataTable -->
+    <script>
+        $(document).ready(function() {
+            $('#tabla-estudiantes').DataTable({
+                responsive: true,
+                columnDefs: [
+                    { responsivePriority: 1, targets: 0 }, // Nombre
+                    { responsivePriority: 2, targets: -1 } // Acciones
+                ],
+                language: {
+                    "sProcessing": "Procesando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sSearch": "Buscar:",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -13,7 +13,7 @@
                 <h4 class="mb-0">Editar Asistencia</h4>
             </div>
             <div class="card-body">
-                <h5 class="text-center mb-4">{{ estudiante.nombre }} — {{ registro.fecha }}</h5>
+                <h5 class="text-center mb-4">{{ estudiante.nombre }} — {{ registro.fecha | latam_fecha }}</h5>
                 <form method="post">
                     <div class="form-group">
                         <label>Estado:</label>

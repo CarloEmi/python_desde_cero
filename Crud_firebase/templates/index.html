@@ -4,97 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listado de Estudiantes</title>
-
-    <!-- Bootstrap 4 -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- DataTables CSS para Bootstrap 4 -->
-    <link href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css" rel="stylesheet">
-
-    <!-- Font Awesome CDN -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f4f7fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        .table th {
+            background-color: #007bff;
+            color: black;
+            font-weight: 600;
+        }
+        .btn-modern {
+            border-radius: 20px;
+            padding: 8px 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <!-- Barra de navegación -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-            <a class="navbar-brand" href="#">Menú</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Sistema de Asistencias</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="/">Inicio</a>
-                    <a class="nav-item nav-link" href="/index_admin">Panel de administrador</a>
-                    <a class="nav-item nav-link" href="/historial_general">Historial general<span class="sr-only">(current)</span></a>
-                    <a class="nav-item nav-link" href="/logout">Cerrar sesión</a>
-                </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index_admin">Panel de Administrador</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/historial_general">Historial General</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                    </li>
+                </ul>
             </div>
-        </nav>
+        </div>
+    </nav>
 
-        <h3 class="mb-3">Bienvenido, {{ session['user'] }}</h3>
-        <h2 class="text-center">Listado de Estudiantes</h2>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="mb-3">Bienvenido, {{ session['user'] }}</h3>
+                <h2 class="text-center mb-4">Listado de Estudiantes</h2>
 
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="alert alert-warning mt-3">
-                {{ messages[0] }}
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ messages[0] }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+                {% endwith %}
+
+                <a href="/crear" class="btn btn-success btn-modern mb-3">Añadir Estudiante</a>
+
+                <table id="tabla-estudiantes" class="table table-hover table-bordered" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Asistencias</th>
+                            <th>Ausencias</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estudiante in estudiantes %}
+                        <tr>
+                            <td>
+                                {{ estudiante.nombre }}
+                                <a href="/editar_nombre/{{ estudiante.id }}" class="btn btn-outline-primary btn-sm btn-modern">Editar</a>
+                            </td>
+                            <td>{{ estudiante.asistencias }}</td>
+                            <td>{{ estudiante.ausencias }}</td>
+                            <td>
+                                <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="accion" value="asistencia">
+                                    <button type="submit" class="btn btn-primary btn-sm btn-modern mb-1">Marcar Asistencia</button>
+                                </form>
+                                <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="accion" value="ausencia">
+                                    <button type="submit" class="btn btn-warning btn-sm btn-modern mb-1">Registrar Ausencia</button>
+                                </form>
+                                <a href="/agregar_asistencia/{{ estudiante.id }}" class="btn btn-secondary btn-sm btn-modern mb-1">Agregar Manual</a>
+                                <a href="/historial/{{ estudiante.id }}" class="btn btn-info btn-sm btn-modern mb-1">Ver Historial</a>
+                                <form action="/borrar/{{ estudiante.id }}" method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este registro?')">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-modern mb-1">Borrar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        {% endif %}
-        {% endwith %}
-
-        <a href="/crear" class="btn btn-success mb-3">Añadir Estudiante</a>
-
-        <table id="tabla-estudiantes" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%;">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Asistencias</th>
-                    <th>Ausencias</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for estudiante in estudiantes %}
-                <tr>
-                    <td>{{ estudiante.nombre }}<a href="/editar_nombre/{{ estudiante.id }}" class="btn btn-outline-primary btn-sm mb-1"> Editar</a></td>
-                    <td>{{ estudiante.asistencias }}</td>
-                    <td>{{ estudiante.ausencias }}</td>
-                    <td>
-                        <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
-                            <input type="hidden" name="accion" value="asistencia">
-                            <button type="submit" class="btn btn-primary btn-sm mb-1">Marcar Asistencia</button>
-                        </form>
-                        <form action="/marcar_asistencia/{{ estudiante.id }}" method="post" style="display:inline;">
-                            <input type="hidden" name="accion" value="ausencia">
-                            <button type="submit" class="btn btn-warning btn-sm mb-1">Registrar Ausencia</button>
-                        </form>
-                        <a href="/agregar_asistencia/{{ estudiante.id }}" class="btn btn-secondary btn-sm mb-1">Agregar Manual</a>
-                        <a href="/historial/{{ estudiante.id }}" class="btn btn-info btn-sm mb-1">Ver Historial</a>
-                        <form action="/borrar/{{ estudiante.id }}" method="post" style="display:inline;" action="{{ url_for('borrar', id=estudiante.id) }}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este registro?')">
-                            <button type="submit" class="btn btn-danger btn-sm mb-1">Borrar</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        </div>
     </div>
 
-    <!-- jQuery y Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
-
-    <!-- Activar DataTable -->
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#tabla-estudiantes').DataTable({
                 responsive: true,
                 columnDefs: [
@@ -106,11 +144,10 @@
                     "sLengthMenu": "Mostrar _MENU_ registros",
                     "sZeroRecords": "No se encontraron resultados",
                     "sEmptyTable": "Ningún dato disponible en esta tabla",
-                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando 0 a 0 de 0 registros",
+                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
                     "sSearch": "Buscar:",
-                    "sLoadingRecords": "Cargando...",
                     "oPaginate": {
                         "sFirst": "Primero",
                         "sLast": "Último",

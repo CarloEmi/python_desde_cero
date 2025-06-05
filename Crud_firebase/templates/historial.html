@@ -4,48 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Asistencia</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/2.0.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Centrar el contenedor en la pantalla */
-        .historial-container {
-            max-width: 600px;  /* Limitar el ancho a un valor de 600px */
-            margin: 100px auto;  /* Centrar el contenedor en la página */
-            padding: 30px;
-            border: 1px solid #ddd;  /* Agregar un borde alrededor */
-            border-radius: 8px;  /* Bordes redondeados */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra suave */
-        }
-
         body {
-            background-color: #f8f9fa; /* Fondo claro para la página */
+            background-color: #f4f7fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .historial-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        .table th {
+            background-color: #007bff;
+            color: black;
+        }
+        .badge-presente {
+            background-color: #28a745;
+        }
+        .badge-ausente {
+            background-color: #dc3545;
+        }
+        .btn-modern {
+            border-radius: 20px;
+            padding: 8px 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="historial-container">
-            <h2 class="text-center">Historial de Asistencia</h2>
+            <h2 class="text-center mb-4">Historial de Asistencia</h2>
             <h4 class="text-center">{{ estudiante.nombre }}</h4>
-            <ul class="list-group mt-4">
+            <ul class="list-group mb-4">
                 <li class="list-group-item">Asistencias Totales: <strong>{{ estudiante.asistencias }}</strong></li>
                 <li class="list-group-item">Ausencias Totales: <strong>{{ estudiante.ausencias }}</strong></li>
             </ul>
-            
-            <form method="get" class="form-inline mb-3">
-                <label for="desde" class="mr-2">Desde:</label>
-                <input type="date" name="desde" id="desde" class="form-control mr-3" value="{{ request.args.desde or '' }}">
-                
-                <label for="hasta" class="mr-2">Hasta:</label>
-                <input type="date" name="hasta" id="hasta" class="form-control mr-3" value="{{ request.args.hasta or '' }}">
 
-                <button type="submit" class="btn btn-primary">Filtrar</button>
+            <form method="get" class="filter-form mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="desde" class="form-label">Desde:</label>
+                        <input type="date" name="desde" id="desde" class="form-control" value="{{ request.args.desde or '' }}">
+                    </div>
+                    <div class="col-auto">
+                        <label for="hasta" class="form-label">Hasta:</label>
+                        <input type="date" name="hasta" id="hasta" class="form-control" value="{{ request.args.hasta or '' }}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-modern">Filtrar</button>
+                    </div>
+                </div>
             </form>
 
-            
             <h5 class="mt-4">Registros Detallados:</h5>
             {% if estudiante.historial %}
-            <table id="tabla-estudiantes" class="table table-bordered">
-                <thead class="thead-dark">
+            <table id="tabla-estudiantes" class="table table-bordered table-hover">
+                <thead>
                     <tr>
                         <th>Fecha</th>
                         <th>Estado</th>
@@ -55,18 +75,18 @@
                 <tbody>
                     {% for registro in estudiante.historial %}
                     <tr>
-                        <td>{{ registro.fecha | latam_fecha}}</td>
+                        <td data-sort="{{ registro.fecha }}">{{ registro.fecha | latam_fecha }}</td>
                         <td>
                             {% if registro.estado == 'Presente' %}
-                                <span class="badge badge-success">{{ registro.estado }}</span>
+                                <span class="badge badge-presente">{{ registro.estado }}</span>
                             {% else %}
-                                <span class="badge badge-danger">{{ registro.estado }}</span>
+                                <span class="badge badge-ausente">{{ registro.estado }}</span>
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ url_for('editar_historial', id=request.view_args.id, fecha=registro.fecha) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{{ url_for('editar_historial', id=request.view_args.id, fecha=registro.fecha) }}" class="btn btn-warning btn-sm btn-modern">Editar</a>
                             <form action="{{ url_for('eliminar_registro', id=request.view_args.id, fecha=registro.fecha) }}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que querés eliminar este registro?')">Eliminar</button>
+                                <button type="submit" class="btn btn-danger btn-sm btn-modern" onclick="return confirm('¿Estás seguro de que querés eliminar este registro?')">Eliminar</button>
                             </form>
                         </td>
                     </tr>
@@ -74,29 +94,16 @@
                 </tbody>
             </table>
             {% else %}
-            <p>No hay registros de asistencia aún.</p>
+            <p class="text-muted">No hay registros de asistencia aún.</p>
             {% endif %}
-            <a href="/" class="btn btn-secondary mt-4">Regresar</a>
+            <a href="/" class="btn btn-secondary btn-modern mt-4">Regresar</a>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Agrega Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js"></script>
-    
-    <!-- jQuery y Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
 <!-- Activar DataTable -->
     <script>
         $(document).ready(function() {

@@ -363,6 +363,16 @@ def historial_general():
     desde = request.args.get('desde')
     hasta = request.args.get('hasta')
 
+    try:
+        # Validar y parsear fechas
+        if desde:
+            datetime.strptime(desde, '%Y-%m-%d')
+        if hasta:
+            datetime.strptime(hasta, '%Y-%m-%d')
+    except ValueError:
+        flash("Formato de fecha inválido. Use YYYY-MM-DD.")
+        return redirect(url_for('historial_general'))
+
     historial_filtrado = []
     estudiantes_ref = db.collection(collection_name).stream()
 
@@ -373,12 +383,14 @@ def historial_general():
             fecha = registro['fecha']
             if (not desde or fecha >= desde) and (not hasta or fecha <= hasta):
                 historial_filtrado.append({
-                    'fecha': fecha,
+                    'fecha': fecha,  # Formato YYYY-MM-DD para ordenamiento
+                    'fecha_display': datetime.strptime(fecha, '%Y-%m-%d').strftime('%d/%m/%Y'),  # Formato para mostrar
                     'nombre': data.get('nombre', 'Sin nombre'),
                     'estado': registro['estado'],
-                    'id': est.id  # Usamos el ID del documento
+                    'id': est.id
                 })
 
+    # Ordenar por fecha descendente
     historial_ordenado = sorted(historial_filtrado, key=lambda x: x['fecha'], reverse=True)
     return render_template('historial_general.html', historial=historial_ordenado)
 
